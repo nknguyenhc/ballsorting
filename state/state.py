@@ -6,6 +6,7 @@ class State:
         """
         self.balls = balls
         self.max_length = max_length
+        self.hash: int | None = None
     
     def move(self, move: tuple[int, int]) -> "State":
         """Moves the top ball from the from_tube to the to_tube.
@@ -34,3 +35,22 @@ class State:
             return False
         
         return self.max_length == other.max_length and self.balls == other.balls
+    
+    def is_terminal(self) -> bool:
+        """Returns True if the puzzle is solved."""
+        return all(
+            all(ball == balls[0] for ball in balls) and len(balls) == self.max_length
+            if len(balls) > 0 else True
+            for balls in self.balls
+        )
+    
+    def __hash__(self):
+        if self.hash is None:
+            self.hash = hash(tuple(map(tuple, self.balls)))
+        return self.hash
+    
+    def __repr__(self):
+        return f"State({self.balls}, {self.max_length})"
+    
+    def __str__(self):
+        return self.__repr__()
