@@ -1,3 +1,3 @@
-from .sorting import Agent, UnsolvablePuzzle
+from .sorting import Agent, UnsolvablePuzzleException
 
-__all__ = ["Agent", "UnsolvablePuzzle"]
+__all__ = ["Agent", "UnsolvablePuzzleException"]

@@ -24,9 +24,9 @@ class State:
             for to_tube, other_tube in enumerate(self.balls):
                 if from_tube == to_tube:
                     continue
-                if len(other_tube) == self.max_length:
+                if len(other_tube) == self.max_length or len(tube) == 0:
                     continue
-                if other_tube[-1] == tube[-1]:
+                if len(other_tube) == 0 or other_tube[-1] == tube[-1]:
                     actions.append((from_tube, to_tube))
         return actions
     
@@ -54,3 +54,9 @@ class State:
     
     def __str__(self):
         return self.__repr__()
+    
+    def get_ball(self, tube: int) -> int:
+        """Returns the top ball of the given tube.
+        Assuming that the tube is not empty.
+        """
+        return self.balls[tube][-1]

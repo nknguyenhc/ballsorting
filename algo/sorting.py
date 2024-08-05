@@ -1,6 +1,6 @@
 from state import State
 
-class UnsolvablePuzzle(Exception):
+class UnsolvablePuzzleException(Exception):
     def __init__(self):
         super().__init__("The puzzle is unsolvable.")
 
@@ -13,7 +13,7 @@ class Agent:
         self.visited_states.clear()
         moves = self._solve(puzzle)
         if moves is None:
-            raise UnsolvablePuzzle()
+            raise UnsolvablePuzzleException()
         return list(reversed(moves))
     
     def _solve(self, puzzle: State) -> list[tuple[int, int]] | None:
@@ -25,7 +25,7 @@ class Agent:
         
         for action in puzzle.actions():
             new_state = puzzle.move(action)
-            self.visited_states.add(puzzle)
+            self.visited_states.add(new_state)
             result = self._solve(new_state)
             if result is not None:
                 result.append(action)
