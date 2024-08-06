@@ -20,11 +20,10 @@ class Agent:
         if puzzle.is_terminal():
             return []
         
-        if puzzle in self.visited_states:
-            return None
-        
         for action in puzzle.actions():
             new_state = puzzle.move(action)
+            if new_state in self.visited_states:
+                continue
             self.visited_states.add(new_state)
             result = self._solve(new_state)
             if result is not None:

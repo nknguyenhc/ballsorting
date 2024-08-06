@@ -26,6 +26,8 @@ class State:
                     continue
                 if len(other_tube) == self.max_length or len(tube) == 0:
                     continue
+                if all(ball == tube[0] for ball in tube) and len(other_tube) == 0:
+                    continue
                 if len(other_tube) == 0 or other_tube[-1] == tube[-1]:
                     actions.append((from_tube, to_tube))
         return actions
