@@ -7,12 +7,30 @@ class ColourIdentifier:
         path: str = 'data/colours.json',
         distance_threshold: int = 20,
         balls_per_tube: int = 4,
+        colour_name_path: str = 'data/colour_names.json',
     ):
         with open(path, 'r') as f:
             self.colours = json.load(f)
         self._validate_colours()
         self.distance_threshold = distance_threshold
         self.balls_per_tube = balls_per_tube
+        with open(colour_name_path, 'r') as f:
+            self.colour_names = json.load(f)
+        self._validate_colour_names()
+    
+    def _validate_colour_names(self) -> None:
+        for colour in self.colour_names:
+            if "name" not in colour or "rgb" not in colour:
+                raise ValueError(f'"name" or "rgb" key not found in colour: {colour}')
+            if not isinstance(colour["name"], str):
+                raise ValueError(f'Invalid name: {colour["name"]}')
+            if not isinstance(colour["rgb"], list):
+                raise ValueError(f'Invalid rgb: {colour["rgb"]}')
+            if len(colour["rgb"]) != 3:
+                raise ValueError(f'Invalid rgb length: {len(colour["rgb"])}, expected 3')
+            for rgb in colour["rgb"]:
+                if not isinstance(rgb, int) or rgb < 0 or rgb > 255:
+                    raise ValueError(f'Invalid rgb value: {rgb}')
     
     def _validate_colours(self) -> None:
         for key in self.colours:
@@ -37,7 +55,7 @@ class ColourIdentifier:
             if not isinstance(data["distance"], float):
                 raise ValueError(f'Invalid distance: {data["distance"]}')
     
-    def identify_colours(self, image_path: str, num_of_tubes: int) -> list[list[int]]:
+    def identify_colours(self, image_path: str, num_of_tubes: int) -> tuple[list[list[int]], list[str]]:
         if str(num_of_tubes) not in self.colours:
             raise ValueError(f'Invalid number of tubes: {num_of_tubes}')
         data = self.colours[str(num_of_tubes)]
@@ -47,7 +65,8 @@ class ColourIdentifier:
         for i in range(num_of_tubes):
             tube = self._identify_tube(image, data["positions"][i], data["distance"], colours)
             tubes.append(tube)
-        return tubes
+        colour_names = self._get_colour_names(colours)
+        return tubes, colour_names
     
     def _identify_tube(
         self,
@@ -80,6 +99,22 @@ class ColourIdentifier:
 
     def _calculate_distance(self, pixel: tuple[int, int, int], colour: tuple[int, int, int]) -> float:
         return sum((pixel[i] - colour[i]) ** 2 for i in range(3)) ** 0.5
+    
+    def _get_colour_names(self, colours: list[tuple[int, int, int]]) -> list[str]:
+        colour_names: list[str] = []
+        for colour in colours:
+            colour_names.append(self._get_colour_name(colour))
+        return colour_names
+    
+    def _get_colour_name(self, colour: tuple[int, int, int]) -> str:
+        min_distance = float('inf')
+        colour_name = ''
+        for model_colour in self.colour_names:
+            distance = self._calculate_distance(colour, model_colour["rgb"])
+            if distance < min_distance:
+                min_distance = distance
+                colour_name = model_colour["name"]
+        return colour_name
 
 
 if __name__ == '__main__':
