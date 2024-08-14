@@ -20,9 +20,7 @@ def evaluate(model: TubeIdentifier, images: list[np.ndarray], target: np.ndarray
     return accuracy
 
 def main():
-    images, target = DataLoader().load()
-    input_dim = images[0].shape[0]
-    output_dim = np.max(target) + 1
+    images, target, input_dim, output_dim = DataLoader().load()
 
     model = TubeIdentifier(input_dim, output_dim)
     train_images, train_target, test_images, test_target = train_test_split(images, target)

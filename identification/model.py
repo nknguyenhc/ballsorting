@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 import numpy as np
+import os
 
 class TubeIdentifierModel(nn.Module):
     def __init__(self, input_dim: int, output_dim: int):
@@ -20,6 +21,16 @@ class TubeIdentifierModel(nn.Module):
 class TubeIdentifier:
     def __init__(self, input_dim: int, output_dim: int):
         self.model = TubeIdentifierModel(input_dim, output_dim)
+    
+    def save_model(self, path: str = 'data/model.pth'):
+        directory = os.path.dirname(path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        torch.save(self.model.state_dict(), path)
+    
+    def load_model(self, path: str = 'data/model.pth'):
+        assert os.path.exists(path), 'The model file does not exist.'
+        self.model.load_state_dict(torch.load(path, weights_only=True))
     
     def train(self, images: list[np.ndarray], target: np.ndarray, epochs: int = 100):
         optimiser = torch.optim.Adam(self.model.parameters())
