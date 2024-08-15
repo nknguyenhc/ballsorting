@@ -12,8 +12,11 @@ class Identifier:
     
     def identify(self, image_path: str) -> list[list[int]]:
         image = self.data_loader.load_image(image_path)
+        print(f"Image loaded, shape {image.shape}")
         num_of_tubes = self.model.predict_single(image)
+        print(f"Number of tubes: {num_of_tubes}")
         tubes, colour_names = self.colour_identifier.identify_colours(image_path, num_of_tubes)
+        print(f"Puzzle: {tubes}")
         self.colour_names = colour_names
         return tubes
     
