@@ -26,11 +26,23 @@ class State:
                     continue
                 if len(other_tube) == self.max_length or len(tube) == 0:
                     continue
+                if self._count_similar_balls(tube) > self.max_length - len(other_tube):
+                    continue
                 if all(ball == tube[0] for ball in tube) and len(other_tube) == 0:
                     continue
                 if len(other_tube) == 0 or other_tube[-1] == tube[-1]:
                     actions.append((from_tube, to_tube))
         return actions
+    
+    def _count_similar_balls(self, tube: list[int]) -> int:
+        """Returns the number of similar balls at the top of the tube."""
+        count = 1
+        for i in range(len(tube) - 2, -1, -1):
+            if tube[i] == tube[-1]:
+                count += 1
+            else:
+                break
+        return count
     
     def __eq__(self, other):
         if not isinstance(other, State):
