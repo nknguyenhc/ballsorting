@@ -1,5 +1,5 @@
 class State:
-    def __init__(self, balls: list[list[int]], max_length: int):
+    def __init__(self, balls: list[list[int]], max_length: int, from_tube: int | None = None):
         """Instantiates a new state with the given tubes of balls.
         Each tube must have equal max length.
         Each colour is represented by a number.
@@ -7,42 +7,44 @@ class State:
         self.balls = balls
         self.max_length = max_length
         self.hash: int | None = None
+        self.from_tube = from_tube
     
     def move(self, move: tuple[int, int]) -> "State":
         """Moves the top ball from the from_tube to the to_tube.
         This function does not check the validity of the move.
         """
         from_tube, to_tube = move
+        assert self.from_tube is None or from_tube == self.from_tube
         new_balls = [tube.copy() for tube in self.balls]
-        new_balls[to_tube].append(new_balls[from_tube].pop())
-        return State(new_balls, self.max_length)
+        colour = new_balls[from_tube][-1]
+        while len(new_balls[from_tube]) > 0 \
+                and len(new_balls[to_tube]) < self.max_length \
+                and new_balls[from_tube][-1] == colour:
+            new_balls[to_tube].append(new_balls[from_tube].pop())
+        new_from_tube = from_tube if len(new_balls[from_tube]) > 0 and new_balls[from_tube][-1] == colour else None
+        return State(new_balls, self.max_length, from_tube=new_from_tube)
     
     def actions(self):
         """Returns a list of all possible moves from this state."""
         actions = []
-        for from_tube, tube in enumerate(self.balls):
-            for to_tube, other_tube in enumerate(self.balls):
-                if from_tube == to_tube:
-                    continue
-                if len(other_tube) == self.max_length or len(tube) == 0:
-                    continue
-                if self._count_similar_balls(tube) > self.max_length - len(other_tube):
-                    continue
-                if all(ball == tube[0] for ball in tube) and len(other_tube) == 0:
-                    continue
-                if len(other_tube) == 0 or other_tube[-1] == tube[-1]:
-                    actions.append((from_tube, to_tube))
+        if self.from_tube is not None:
+            self._actions_from_tube(self.from_tube, actions)
+        else:
+            for from_tube in range(len(self.balls)):
+                self._actions_from_tube(from_tube, actions)
         return actions
-    
-    def _count_similar_balls(self, tube: list[int]) -> int:
-        """Returns the number of similar balls at the top of the tube."""
-        count = 1
-        for i in range(len(tube) - 2, -1, -1):
-            if tube[i] == tube[-1]:
-                count += 1
-            else:
-                break
-        return count
+
+    def _actions_from_tube(self, from_tube: int, actions: list[tuple]) -> None:
+        """Appends all possible moves from the given tube to the actions list."""
+        for to_tube, other_tube in enumerate(self.balls):
+            if from_tube == to_tube:
+                continue
+            if len(other_tube) == self.max_length or len(self.balls[from_tube]) == 0:
+                continue
+            if all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube]) and len(other_tube) == 0:
+                continue
+            if len(other_tube) == 0 or other_tube[-1] == self.balls[from_tube][-1]:
+                actions.append((from_tube, to_tube))
     
     def __eq__(self, other):
         if not isinstance(other, State):

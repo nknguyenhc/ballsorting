@@ -1,5 +1,5 @@
 import unittest
-from .sorting import Agent, UnsolvablePuzzle
+from .sorting import Agent, UnsolvablePuzzleException
 from state import State
 
 class TestAgent(unittest.TestCase):
@@ -47,8 +47,37 @@ class TestAgent(unittest.TestCase):
             ],
             3,
         )
-        with self.assertRaises(UnsolvablePuzzle):
+        with self.assertRaises(UnsolvablePuzzleException):
             agent.solve(puzzle)
+    
+    def test_split_move(self):
+        agent = Agent()
+        puzzle = State(
+            [
+                [0, 0, 1, 1],
+                [2, 2, 1],
+                [2, 2, 1],
+                [0, 0],
+            ],
+            4,
+        )
+        moves = agent.solve(puzzle)
+        self.assert_puzzle_solved(puzzle, moves)
+    
+    def test_waiting_move(self):
+        agent = Agent()
+        puzzle = State(
+            [
+                [0, 0, 1, 1],
+                [0, 0, 1],
+                [1, 2, 2],
+                [2, 2],
+            ],
+            4,
+        )
+        moves = agent.solve(puzzle)
+        self.assert_puzzle_solved(puzzle, moves)
+        self.assertTrue(len(moves) <= 5)
 
 
 if __name__ == '__main__':
