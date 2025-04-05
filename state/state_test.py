@@ -101,6 +101,10 @@ class TestState(unittest.TestCase):
                 4,
             ),
         )
+    
+    def test_clone(self):
+        clone = self.state.clone()
+        self.assertEqual(self.state, clone)
 
 
 if __name__ == '__main__':

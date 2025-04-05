@@ -94,3 +94,6 @@ class State:
         new_balls = [t.copy() for t in self.balls]
         new_balls[tube][-1] = colour
         return State(new_balls, self.max_length, self.from_tube)
+    
+    def clone(self) -> "State":
+        return State([t.copy() for t in self.balls], self.max_length, self.from_tube)
