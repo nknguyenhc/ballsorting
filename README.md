@@ -81,8 +81,18 @@ python -m identification.init
 
 This does training on your data, and save the model to the `data` folder.
 
-You can now run the model. Save an image in your `data` folder with name `image.png` (or `image.jpg` if you use JPG extension), and run the following:
+You can now run the model. Save an image in your `data` folder with name `image.jpg` (or `image.png` if you use PNG extension), and run the following:
 
 ```bash
-python -m manager.file_input data/image.png
+python -m manager.file_input data/image.jpg
 ```
+
+### Explainer
+
+To run the explainer model, first ensure that you have created a model. Save an image in your `data` folder with name `image.jpg` (or `image.png` if you use PNG extension), and run the following command:
+
+```bash
+python -m identification.explainer data/image.jpg
+```
+
+The command shows an image where pixels that does not contribute to the prediction is greyed out. Note that currently, the explanation does not work very well, either because the explainer is erronous, or the model itself is not robust.

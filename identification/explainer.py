@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
+import sys
 
 from .load import DataLoader
 from .model import TubeIdentifier
@@ -92,8 +93,9 @@ class Explainer:
 
 
 def main():
+    image_path = sys.argv[1]
     explainer = Explainer()
-    explainer.explain("data/102.png")
+    explainer.explain(image_path)
 
 
 if __name__ == '__main__':
