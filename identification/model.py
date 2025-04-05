@@ -51,8 +51,15 @@ class TubeIdentifier:
     
     def predict(self, images: list[np.ndarray]) -> np.ndarray:
         images = torch.from_numpy(np.array(images)).float()
-        return torch.argmax(self.model.forward(images), axis=1).numpy()
+        with torch.no_grad():
+            return torch.argmax(self.model.forward(images), axis=1).numpy()
 
     def predict_single(self, image: np.ndarray) -> int:
         image = torch.from_numpy(image).float()
-        return torch.argmax(self.model.forward(image)).item()
+        with torch.no_grad():
+            return torch.argmax(self.model.forward(image)).item()
+    
+    def predict_probas(self, images: list[np.ndarray]) -> torch.Tensor:
+        input = torch.from_numpy(np.array(images).reshape(len(images), -1)).float()
+        with torch.no_grad():
+            return nn.functional.softmax(self.model.forward(input), dim=1)

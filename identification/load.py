@@ -32,12 +32,15 @@ class DataLoader:
         output_dim = np.max(target) + 1
         return images, target, input_dim, output_dim
 
-    def load_image(self, path: str) -> np.ndarray:
+    def load_image(self, path: str, flatten: bool = True) -> np.ndarray:
         image = Image.open(path)
         aspect_ratio = image.size[0] / image.size[1]
         new_width = int(self.new_height * aspect_ratio)
         image = image.resize((new_width, self.new_height))
-        return np.array(image).reshape(-1)
+        if flatten:
+            return np.array(image).reshape(-1)
+        else:
+            return np.array(image)
     
     def load_metadata(
         self,
