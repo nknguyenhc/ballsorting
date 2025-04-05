@@ -62,6 +62,46 @@ class TestState(unittest.TestCase):
             ),
         )
 
+    def test_unk(self):
+        state = State(
+            [
+                [1, -1, 3, 3],
+                [2, 3, 3, 3],
+                [1, 2, 3],
+                [1, 3, 2],
+                [],
+            ],
+            4,
+        )
+        next_state = state.move((0, 4))
+        self.assertEqual(
+            next_state,
+            State(
+                [
+                    [1, -1],
+                    [2, 3, 3, 3],
+                    [1, 2, 3],
+                    [1, 3, 2],
+                    [3, 3],
+                ],
+                4,
+            ),
+        )
+        self.assertEqual(state.balls_moved(next_state), 2)
+        self.assertEqual(
+            next_state.assign(0, 2),
+            State(
+                [
+                    [1, 2],
+                    [2, 3, 3, 3],
+                    [1, 2, 3],
+                    [1, 3, 2],
+                    [3, 3],
+                ],
+                4,
+            ),
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

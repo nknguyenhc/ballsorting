@@ -1,4 +1,6 @@
 class State:
+    UNK = -1
+
     def __init__(self, balls: list[list[int]], max_length: int, from_tube: int | None = None):
         """Instantiates a new state with the given tubes of balls.
         Each tube must have equal max length.
@@ -82,3 +84,13 @@ class State:
             if len(tube1) != len(tube2):
                 return abs(len(tube1) - len(tube2))
         return 0
+    
+    def assign(self, tube: int, colour: int) -> "State":
+        """Assign the top ball of this tube to the colour,
+        returning a new copy.
+        The tube must have ball and the top ball must be unknown.
+        """
+        assert len(self.balls[tube]) > 0 and self.balls[tube][-1] == State.UNK
+        new_balls = [t.copy() for t in self.balls]
+        new_balls[tube][-1] = colour
+        return State(new_balls, self.max_length, self.from_tube)
