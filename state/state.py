@@ -76,3 +76,9 @@ class State:
         Assuming that the tube is not empty.
         """
         return self.balls[tube][-1]
+    
+    def balls_moved(self, state: "State") -> int:
+        for tube1, tube2 in zip(self.balls, state.balls):
+            if len(tube1) != len(tube2):
+                return abs(len(tube1) - len(tube2))
+        return 0

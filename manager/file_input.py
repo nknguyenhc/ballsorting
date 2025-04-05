@@ -25,11 +25,13 @@ class Manager:
             from_tube, to_tube = move
             ball = self.state.get_ball(from_tube)
             colour = identifier.get_colour_name(ball)
+            next_state = self.state.move(move)
+            n = self.state.balls_moved(next_state)
             try:
-                input(f"{colour}, {from_tube + 1} -> {to_tube + 1}.")
+                input(f"{n} {colour}, {from_tube + 1} -> {to_tube + 1}.")
             except KeyboardInterrupt:
                 return
-            self.state = self.state.move(move)
+            self.state = next_state
         print("Done")
 
 

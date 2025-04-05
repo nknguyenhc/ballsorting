@@ -66,12 +66,15 @@ class Manager:
     def _display_solution(self, moves: list[tuple[int, int]]):
         for move in moves:
             from_tube, to_tube = move
+            colour = self.number_dict[self.state.get_ball(from_tube)]
+            next_state = self.state.move(move)
+            n = self.state.balls_moved(next_state)
             try:
                 input(
-                    f"{self.number_dict[self.state.get_ball(from_tube)]}, {from_tube + 1} -> {to_tube + 1}.")
+                    f"{n} {colour}, {from_tube + 1} -> {to_tube + 1}.")
             except KeyboardInterrupt:
                 return
-            self.state = self.state.move(move)
+            self.state = next_state
         print("Done")
 
 
