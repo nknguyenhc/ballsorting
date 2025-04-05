@@ -177,7 +177,7 @@ class MctsAgent:
         assert len(state.balls) == len(self.balls)
         for tube in range(len(state.balls)):
             for i in range(min(len(state.balls[tube]), len(self.balls[tube]))):
-                if self.balls[tube][i] != State.UNK:
+                if self.balls[tube][i] != State.UNK or state.balls[tube][i] == State.UNK:
                     continue
                 self.balls[tube][i] = state.balls[tube][i]
                 assert self.counts[state.balls[tube][i]] > 0
@@ -191,10 +191,10 @@ class MctsAgent:
         ---
         state: State
             The state to make a move on.
+            This function will mutate the state.
         fresh: bool
             Whether this is a new game.
         """
-        state = state.clone()
         if fresh:
             self._populate_state(state)
         else:
