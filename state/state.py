@@ -26,7 +26,7 @@ class State:
         new_from_tube = from_tube if len(new_balls[from_tube]) > 0 and new_balls[from_tube][-1] == colour else None
         return State(new_balls, self.max_length, from_tube=new_from_tube)
     
-    def actions(self):
+    def actions(self) -> list[tuple[int, int]]:
         """Returns a list of all possible moves from this state."""
         actions = []
         if self.from_tube is not None:
@@ -85,12 +85,15 @@ class State:
                 return abs(len(tube1) - len(tube2))
         return 0
     
+    def is_uncertain(self, tube: int):
+        return len(self.balls[tube]) > 0 and self.balls[tube][-1] == State.UNK
+    
     def assign(self, tube: int, colour: int) -> "State":
         """Assign the top ball of this tube to the colour,
         returning a new copy.
         The tube must have ball and the top ball must be unknown.
         """
-        assert len(self.balls[tube]) > 0 and self.balls[tube][-1] == State.UNK
+        assert self.is_uncertain(tube)
         new_balls = [t.copy() for t in self.balls]
         new_balls[tube][-1] = colour
         return State(new_balls, self.max_length, self.from_tube)
