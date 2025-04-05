@@ -7,13 +7,12 @@ from .load import DataLoader
 from .model import TubeIdentifier
 
 class Explainer:
-    def __init__(self, grey_color: tuple[int, ...] = (0, 0, 0)):
+    def __init__(self):
         self.data_loader = DataLoader()
         input_dim, output_dim = self.data_loader.load_metadata()
         self.model = TubeIdentifier(input_dim, output_dim)
         self.model.load_model()
         self.output_dim = output_dim
-        self.grey_color = np.array(grey_color)
     
     def explain(self,
                 path: str,
@@ -41,6 +40,7 @@ class Explainer:
     
     def _sample_around(self,
                        image: np.ndarray,
+                       grey_color: tuple[int, ...] = (0, 0, 0),
                        sample_size: int = 10000,
                        ) -> tuple[list[np.ndarray], list[np.ndarray], list[float]]:
         inputs: list[np.array] = []
@@ -54,7 +54,7 @@ class Explainer:
             input[mask] = 0
             inputs.append(input)
             im = image.reshape(h * w, 3).copy()
-            im[mask] = self.grey_color
+            im[mask] = grey_color
             results.append(im.reshape(h, w, 3))
             pi = 1.0
             pis.append(pi)
@@ -82,10 +82,11 @@ class Explainer:
                  g: nn.Linear,
                  image: np.ndarray,
                  weight_threshold: float = 0.001,
+                 highlight_grey_color: tuple[int, ...] = (100, 100, 100),
                  ):
         h, w, _ = image.shape
         params = list(g.parameters())[0].detach().numpy()[0].reshape(h, w)
-        image[params < weight_threshold] = self.grey_color
+        image[params < weight_threshold] = highlight_grey_color
         plt.imshow(image)
         plt.show()
 
