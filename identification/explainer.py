@@ -21,18 +21,16 @@ class Explainer:
                 ):
         image = self.data_loader.load_image(path, flatten=False)
         cl = self.model.predict_single(image.reshape(-1))
-        mask = torch.arange(0, self.output_dim, 1) != cl
         h, w, _ = image.shape
         inputs, images, pis = self._sample_around(image)
-        probas = self.model.predict_probas(images)
-        probas = torch.hstack((torch.sum(probas[:, mask], dim=1)[:, None], probas[:, ~mask]))
+        probas = self.model.predict_probas(images)[:, cl]
         inputs, pis, probas = self._upsample(inputs, pis, probas)
-        g = nn.Linear(h * w, 2)
+        g = nn.Linear(h * w, 1)
         optimizer = torch.optim.Adam(g.parameters(), lr=0.01)
         for i in range(epochs):
             optimizer.zero_grad()
-            output = g(inputs)
-            loss = torch.sum(pis * torch.sum(torch.square(probas - output), dim=1))
+            output = g(inputs).squeeze()
+            loss = torch.sum(pis * torch.square(probas - output))
             loss.backward()
             optimizer.step()
 
@@ -67,17 +65,17 @@ class Explainer:
                   pis: list[float],
                   probas: torch.Tensor
                   ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        labels = np.argmax(probas.detach().numpy(), axis=1)
-        assert np.count_nonzero(labels == 0) > 0
-        upsample_size = np.count_nonzero(labels == 1) - np.count_nonzero(labels == 0)
+        labels = probas.detach().numpy() > 0.5
+        assert np.count_nonzero(~labels) > 0
+        upsample_size = np.count_nonzero(labels) - np.count_nonzero(~labels)
         assert upsample_size > 0
-        indices = np.where(labels == 0)[0]
+        indices = np.where(~labels)[0]
         samples = np.random.choice(indices, upsample_size)
         inputs = torch.tensor(np.array(inputs)).float()
-        inputs = torch.vstack((inputs[labels == 0], inputs[samples], inputs[labels == 1]))
+        inputs = torch.vstack((inputs[~labels], inputs[samples], inputs[labels]))
         pis = torch.tensor(pis)
-        pis = torch.concat((pis[labels == 0], pis[samples], pis[labels == 1]))
-        probas = torch.vstack((probas[labels == 0], probas[samples], probas[labels == 1]))
+        pis = torch.concat((pis[~labels], pis[samples], pis[labels]))
+        probas = torch.concat((probas[~labels], probas[samples], probas[labels]))
         return inputs, pis, probas
     
     def _analyse(self,
@@ -86,7 +84,7 @@ class Explainer:
                  weight_threshold: float = 0.001,
                  ):
         h, w, _ = image.shape
-        params = list(g.parameters())[0].detach().numpy()[1].reshape(h, w)
+        params = list(g.parameters())[0].detach().numpy()[0].reshape(h, w)
         image[params < weight_threshold] = self.grey_color
         plt.imshow(image)
         plt.show()
