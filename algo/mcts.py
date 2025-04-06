@@ -1,7 +1,10 @@
-from state import State
 import math
 import random
 import time
+
+from state import State
+from .sorting import Agent as SortingAgent, UnsolvablePuzzleException
+from timeout_decorator import timeout, TimeoutError
 
 class MctsNode:
     C = 1
@@ -11,6 +14,8 @@ class MctsNode:
     def __init__(self,
                  agent: "MctsAgent",
                  state: State,
+                 counts: list[int],
+                 total: int,
                  parent: "MctsNode" = None,
                  move: tuple[int, int] | None = None,
                  ):
@@ -20,6 +25,8 @@ class MctsNode:
         self.parent = parent
         self.move = move
         self.agent = agent
+        self.counts = list(counts)
+        self.total = total
     
     def ucb(self):
         if self.N == 0:
@@ -36,10 +43,12 @@ class MctsCertainNode(MctsNode):
     def __init__(self,
                  agent: "MctsAgent",
                  state: State,
+                 counts: list[int],
+                 total: int,
                  parent: MctsNode | None = None,
                  move: tuple[int, int] | None = None,
                  ):
-        super().__init__(agent, state, parent, move)
+        super().__init__(agent, state, counts, total, parent, move)
         self.children: list[MctsCertainNode | MctsUncertainNode] | None = None
     
     def search(self):
@@ -58,6 +67,7 @@ class MctsCertainNode(MctsNode):
         return best_child.select()
     
     def expand(self) -> "MctsCertainNode":
+        assert self.children is None or self.children == []
         if self.children == []:
             return self
         self.children = []
@@ -65,45 +75,53 @@ class MctsCertainNode(MctsNode):
             from_tube, _ = action
             next_state = self.state.move(action)
             if next_state.is_uncertain(from_tube):
-                self.children.append(MctsUncertainNode(self.agent, next_state, from_tube, self, action))
+                self.children.append(MctsUncertainNode(self.agent,
+                                                       next_state,
+                                                       from_tube,
+                                                       self.counts,
+                                                       self.total,
+                                                       self,
+                                                       action))
             else:
-                self.children.append(MctsCertainNode(self.agent, next_state, self, action))
+                self.children.append(MctsCertainNode(self.agent,
+                                                     next_state,
+                                                     self.counts,
+                                                     self.total,
+                                                     self,
+                                                     action))
         if self.children == []:
             return self
         idx = random.randint(0, len(self.children) - 1)
         child = self.children[idx]
-        if isinstance(child, MctsCertainNode):
-            return child
-        else:
-            return child.select()
+        return child.select()
     
     def simulate(self) -> float:
-        if self.children == []:
-            return MctsNode.WIN if self.state.is_terminal() else MctsNode.LOSE
-        counts = list(self.agent.counts)
-        total = self.agent.total
-        state = self.state
-        actions = state.actions()
-        while len(actions) > 0:
-            idx = random.randint(0, len(actions) - 1)
-            action = actions[idx]
-            from_tube, _ = action
-            state = state.move(action)
-            if not state.is_uncertain(from_tube):
-                actions = state.actions()
-                continue
-            rand = random.randint(1, total)
-            t = 0
-            for colour, colour_count in enumerate(counts):
-                t += colour_count
-                if t >= rand:
-                    break
-            assert t >= rand and colour_count > 0, f"Failed with {counts=} {total=}"
-            state = state.assign(from_tube, colour)
-            counts[colour] -= 1
-            total -= 1
-            actions = state.actions()
-        return MctsNode.WIN if self.state.is_terminal() else MctsNode.LOSE
+        state = self._get_random_assignment()
+        try:
+            self._find_solution(state)
+            return MctsNode.WIN
+        except TimeoutError:
+            return MctsNode.LOSE
+        except UnsolvablePuzzleException:
+            return MctsNode.LOSE
+    
+    def _get_random_assignment(self) -> State:
+        state = self.state.clone()
+        colours: list[int] = []
+        for colour, count in enumerate(self.counts):
+            colours.extend([colour] * count)
+        idx = 0
+        for tube in state.balls:
+            for i in range(len(tube)):
+                if tube[i] == State.UNK:
+                    tube[i] = colours[idx]
+                    idx += 1
+        assert idx == len(colours)
+        return state
+    
+    @timeout(seconds=0.03)
+    def _find_solution(self, state: State) -> list[tuple[int, int]]:
+        return self.agent.sorter.solve(state)
     
     def best_move(self):
         assert self.children is not None and len(self.children) > 0
@@ -118,22 +136,28 @@ class MctsUncertainNode(MctsNode):
                  agent: "MctsAgent",
                  state: State,
                  tube: int,
+                 counts: list[int],
+                 total: int,
                  parent: MctsNode | None = None,
                  move: tuple[int, int] | None = None,
                  ):
-        super().__init__(agent, state, parent, move)
+        super().__init__(agent, state, counts, total, parent, move)
         assert state.is_uncertain(tube)
-        self.counts = tuple([count for count in self.agent.counts if count > 0])
-        self.total = self.agent.total
         self.children = self._enumerate_children(tube)
-        assert len(self.children) == len(self.counts)
     
     def _enumerate_children(self, tube: int) -> tuple[MctsCertainNode]:
         children: list[MctsCertainNode] = []
-        for colour, colour_count in enumerate(self.agent.counts):
+        for colour, colour_count in enumerate(self.counts):
             if colour_count == 0:
                 continue
-            children.append(MctsCertainNode(self.agent, self.state.assign(tube, colour), self, None))
+            counts = list(self.counts)
+            counts[colour] -= 1
+            children.append(MctsCertainNode(self.agent,
+                                            self.state.assign(tube, colour),
+                                            counts,
+                                            self.total - 1,
+                                            self,
+                                            None))
         return tuple(children)
     
     def select(self) -> MctsCertainNode:
@@ -154,6 +178,7 @@ class MctsAgent:
         self.counts = self._build_counts(num_colours, initial_state.max_length)
         self.total = sum(self.counts)
         self.time_limit = time_limit
+        self.sorter = SortingAgent()
     
     def _build_counts(self, num_colours: int, max_length: int) -> list[int]:
         counts: list[int] = [max_length] * num_colours
@@ -199,9 +224,9 @@ class MctsAgent:
             self._populate_state(state)
         else:
             self._update_belief(state)
-        root = MctsCertainNode(self, state)
+        root = MctsCertainNode(self, state, self.counts, self.total)
         end_time = time.time() + self.time_limit
         while time.time() < end_time:
             root.search()
-        # print(root.N)
+        # print(f"{fresh=} {root.N=} {root.U=}")
         return root.best_move()
