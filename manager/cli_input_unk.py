@@ -19,14 +19,14 @@ class Manager(CliManager):
         agent = MctsAgent(state, num_colours)
         initial_state = state.clone()
         while not state.is_terminal():
-            actions = state.actions()
-            if len(actions) == 0:
+            action = agent.next_move(state, fresh=state == initial_state)
+            if action is None:
                 try:
                     input("Ran out of action. Restart ...")
                 except KeyboardInterrupt:
                     return
-                state  = initial_state.clone()
-            action = agent.next_move(state, fresh=state == initial_state)
+                state = initial_state.clone()
+                continue
             next_state = state.move(action)
             from_tube, to_tube = action
             n = state.balls_moved(next_state)

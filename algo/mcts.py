@@ -163,11 +163,13 @@ class MctsUncertainNode(MctsNode):
     def select(self) -> MctsCertainNode:
         rand = random.randint(1, self.total)
         total = 0
+        idx = 0
         for i, colour_count in enumerate(self.counts):
-            if total + colour_count < rand:
-                total += colour_count
-                continue
-            return self.children[i].select()
+            if total + colour_count >= rand:
+                return self.children[idx].select()
+            total += colour_count
+            if colour_count > 0:
+                idx += 1
 
 class MctsAgent:
     def __init__(self,
@@ -211,6 +213,7 @@ class MctsAgent:
     
     def next_move(self, state: State, fresh: bool = False) -> tuple[int, int]:
         """Returns the next best recommendation of a move.
+        Returns None if current state does not have any available action.
 
         Parameters
         ---
@@ -224,6 +227,9 @@ class MctsAgent:
             self._populate_state(state)
         else:
             self._update_belief(state)
+        if len(state.actions()) == 0:
+            assert not fresh
+            return None
         root = MctsCertainNode(self, state, self.counts, self.total)
         end_time = time.time() + self.time_limit
         while time.time() < end_time:
