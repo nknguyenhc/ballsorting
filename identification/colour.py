@@ -3,6 +3,8 @@ from PIL import Image
 from PIL.ImageFile import ImageFile
 
 class ColourIdentifier:
+    UNK = -1
+
     def __init__(self,
         path: str = 'data/colours.json',
         distance_threshold: int = 20,
@@ -86,6 +88,36 @@ class ColourIdentifier:
                 return []
             tube.append(colour)
         tube.reverse()
+        return tube
+    
+    def identify_unk_colours(self, image_path: str, num_of_tubes: int) -> tuple[list[list[int]], list[str]]:
+        if str(num_of_tubes) not in self.colours:
+            raise ValueError(f'Invalid number of tubes: {num_of_tubes}')
+        data = self.colours[str(num_of_tubes)]
+        image = Image.open(image_path)
+        tubes: list[list[int]] = []
+        colours: list[tuple[int, int, int]] = []
+        for i in range(num_of_tubes):
+            tube = self._identify_unk_tube(image, data["positions"][i], colours)
+            tubes.append(tube)
+        colour_names = self._get_colour_names(colours)
+        return tubes, colour_names
+    
+    def _identify_unk_tube(
+        self,
+        image: ImageFile,
+        position: dict[str, float],
+        colours: list[tuple[int, int, int]],
+    ) -> list[int]:
+        tube: list[int]  = [ColourIdentifier.UNK] * 3
+        pixel: tuple[int, int, int] = image.getpixel((
+            position["x"] * image.width,
+            position["y"] * image.height,
+        ))
+        colour = self._identify_colour(pixel, colours)
+        if colour is None:
+            return []
+        tube.append(colour)
         return tube
     
     def _identify_colour(self, pixel: tuple[int, int, int], colours: list[tuple[int, int, int]]) -> int | None:

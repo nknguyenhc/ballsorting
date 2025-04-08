@@ -20,5 +20,14 @@ class Identifier:
         self.colour_names = colour_names
         return tubes
     
+    def identify_unk(self, image_path: str) -> tuple[list[list[int]], list[str]]:
+        image = self.data_loader.load_image(image_path)
+        print(f"Image loaded, shape {image.shape}")
+        num_of_tubes = self.model.predict_single(image)
+        print(f"Number of tubes: {num_of_tubes}")
+        tubes, colour_names = self.colour_identifier.identify_unk_colours(image_path, num_of_tubes)
+        print(f"Puzzle: {tubes}")
+        return tubes, colour_names
+    
     def get_colour_name(self, ball: int) -> str:
         return self.colour_names[ball]
