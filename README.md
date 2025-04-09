@@ -40,6 +40,14 @@ pink red pink blue
 
 You can name the colour in whatever way you want, however, you need to make sure that the same colour is spelled the same everywhere, and consecutive colours are split by one white space.
 
+To run the solver on unknown data, run the following command:
+
+```bash
+python -m manager.cli_input_unk
+```
+
+Use `?` to represent unknown balls.
+
 ### Data
 
 An important component of this project is the image recognizer, and for that, you need to input your own training data and do the training yourself. You need to put the data in `data` subfolder (create one yourself!). Take note of the following:
@@ -86,6 +94,14 @@ You can now run the model. Save an image in your `data` folder with name `image.
 ```bash
 python -m manager.file_input data/image.jpg
 ```
+
+To run the solver with unknown balls, run the following:
+
+```bash
+python -m manager.file_input_unk data/image.jpg
+```
+
+Note that even if you trained your model only on images with known balls, the model can still generalize to images with unknown balls.
 
 ### Explainer
 
