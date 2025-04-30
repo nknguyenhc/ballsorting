@@ -45,7 +45,9 @@ class State:
                 continue
             if len(other_tube) == self.max_length:
                 continue
-            if all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube]) and len(other_tube) == 0:
+            if all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube]) \
+                and all(ball == self.balls[from_tube][0] for ball in other_tube) \
+                and len(other_tube) < len(self.balls[from_tube]):
                 continue
             if len(other_tube) == 0 or other_tube[-1] == self.balls[from_tube][-1]:
                 actions.append((from_tube, to_tube))
