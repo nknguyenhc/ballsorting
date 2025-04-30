@@ -102,6 +102,30 @@ class TestAgent(unittest.TestCase):
         )
         moves = agent.solve(puzzle)
         self.assert_puzzle_solved(puzzle, moves)
+    
+    def test_timing_2(self):
+        agent = Agent()
+        puzzle = State(
+            [
+                [3, 2, 1, 0],
+                [2, 5, 4, 4],
+                [7, 6, 3, 0],
+                [10, 0, 9, 8],
+                [5, 8, 2, 5],
+                [10, 7, 4, 1],
+                [5, 0, 9, 6],
+                [10, 9, 9, 2],
+                [6, 1, 8, 11],
+                [3, 1, 8, 11],
+                [10, 11, 7, 11],
+                [4, 6, 3, 7],
+                [],
+                [],
+            ],
+            4,
+        )
+        moves = agent.solve(puzzle)
+        self.assert_puzzle_solved(puzzle, moves)
 
 
 if __name__ == '__main__':
