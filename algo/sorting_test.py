@@ -126,6 +126,30 @@ class TestAgent(unittest.TestCase):
         )
         moves = agent.solve(puzzle)
         self.assert_puzzle_solved(puzzle, moves)
+    
+    def test_timing_unsolvable(self):
+        agent = Agent()
+        puzzle = State(
+            [
+                [2, 11, 4, 1],
+                [2, 11, 4, 11],
+                [9, 8, 4, 9],
+                [1, 7, 10, 9],
+                [10, 3, 12, 3],
+                [8, 12, 10, 7],
+                [7, 6, 10, 8],
+                [5, 2, 12, 5],
+                [9, 4, 6, 7],
+                [3, 3, 11, 12],
+                [8, 1, 1, 5],
+                [5, 6, 6, 2],
+                [],
+                [],
+            ],
+            4,
+        )
+        with self.assertRaises(UnsolvablePuzzleException):
+            agent.solve(puzzle)
 
 
 if __name__ == '__main__':
