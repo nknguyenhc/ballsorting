@@ -45,6 +45,7 @@ class TestState(unittest.TestCase):
                     [],
                 ],
                 4,
+                from_tube=1,
             ),
         )
 
