@@ -56,7 +56,7 @@ class State:
         if not isinstance(other, State):
             return False
         
-        return self.max_length == other.max_length and self.balls == other.balls
+        return self.max_length == other.max_length and self.balls == other.balls and self.from_tube == other.from_tube
     
     def is_terminal(self) -> bool:
         """Returns True if the puzzle is solved."""
