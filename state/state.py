@@ -1,3 +1,7 @@
+class ExpressMoveException(Exception):
+    def __init__(self, move: tuple[int, int]):
+        self.move = move
+
 class State:
     UNK = -1
 
@@ -28,6 +32,12 @@ class State:
     
     def actions(self) -> list[tuple[int, int]]:
         """Returns a list of all possible moves from this state."""
+        try:
+            return self._actions()
+        except ExpressMoveException as e:
+            return [e.move]
+    
+    def _actions(self) -> list[tuple[int, int]]:
         actions = []
         if self.from_tube is not None:
             self._actions_from_tube(self.from_tube, actions)
@@ -46,9 +56,13 @@ class State:
             if len(other_tube) == self.max_length:
                 continue
             if all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube]) \
-                and all(ball == self.balls[from_tube][0] for ball in other_tube) \
-                and len(other_tube) < len(self.balls[from_tube]):
-                continue
+                and all(ball == self.balls[from_tube][0] for ball in other_tube):
+                if len(other_tube) < len(self.balls[from_tube]):
+                    continue
+                raise ExpressMoveException((
+                    max(from_tube, to_tube),
+                    min(from_tube, to_tube),
+                ))
             if len(other_tube) == 0 or other_tube[-1] == self.balls[from_tube][-1]:
                 actions.append((from_tube, to_tube))
     
