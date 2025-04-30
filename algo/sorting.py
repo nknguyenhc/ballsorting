@@ -1,4 +1,5 @@
 from state import State
+import time
 
 class UnsolvablePuzzleException(Exception):
     def __init__(self):
@@ -11,7 +12,10 @@ class Agent:
     def solve(self, puzzle: State) -> list[tuple[int, int]]:
         """Solves the puzzle and returns a list of moves."""
         self.visited_states.clear()
+        start_time = time.time()
         moves = self._solve(puzzle)
+        end_time = time.time()
+        print(f"Time taken: {end_time - start_time:.3f} seconds")
         if moves is None:
             raise UnsolvablePuzzleException()
         return list(reversed(moves))

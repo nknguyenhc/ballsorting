@@ -38,10 +38,12 @@ class State:
 
     def _actions_from_tube(self, from_tube: int, actions: list[tuple]) -> None:
         """Appends all possible moves from the given tube to the actions list."""
+        if len(self.balls[from_tube]) == 0:
+            return
         for to_tube, other_tube in enumerate(self.balls):
             if from_tube == to_tube:
                 continue
-            if len(other_tube) == self.max_length or len(self.balls[from_tube]) == 0:
+            if len(other_tube) == self.max_length:
                 continue
             if all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube]) and len(other_tube) == 0:
                 continue
