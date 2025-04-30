@@ -78,6 +78,30 @@ class TestInformedAgent(unittest.TestCase):
         moves = agent.solve(puzzle)
         self.assert_puzzle_solved(puzzle, moves)
         self.assertTrue(len(moves) <= 5)
+    
+    def test_timing(self):
+        agent = InformedAgent()
+        puzzle = State(
+            [
+                [3, 2, 1, 0],
+                [6, 4, 5, 4],
+                [7, 8, 7, 3],
+                [10, 9, 2, 8],
+                [9, 11, 10, 7],
+                [8, 1, 7, 0],
+                [9, 4, 1, 0],
+                [8, 6, 5, 2],
+                [11, 9, 11, 11],
+                [2, 3, 3, 4],
+                [6, 5, 10, 5],
+                [1, 0, 6, 10],
+                [],
+                [],
+            ],
+            4,
+        )
+        moves = agent.solve(puzzle)
+        self.assert_puzzle_solved(puzzle, moves)
 
 
 if __name__ == '__main__':
