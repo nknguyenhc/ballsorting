@@ -50,13 +50,13 @@ class State:
         """Appends all possible moves from the given tube to the actions list."""
         if len(self.balls[from_tube]) == 0:
             return
+        uniform_from = all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube])
         for to_tube, other_tube in enumerate(self.balls):
             if from_tube == to_tube:
                 continue
             if len(other_tube) == self.max_length:
                 continue
-            if all(ball == self.balls[from_tube][0] for ball in self.balls[from_tube]) \
-                and all(ball == self.balls[from_tube][0] for ball in other_tube):
+            if uniform_from and all(ball == self.balls[from_tube][0] for ball in other_tube):
                 if len(other_tube) < len(self.balls[from_tube]):
                     continue
                 raise ExpressMoveException((
