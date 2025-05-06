@@ -141,6 +141,36 @@ class TestAgent(unittest.TestCase):
             self.assert_puzzle_solved(puzzle, moves)
         print(f"Total time 2: {total_time:.3f} seconds")
     
+    def test_timing_3(self):
+        total_time = 0
+        for i in range(20):
+            agent = Agent()
+            puzzle = State(
+                [
+                    [0, 2, 1, 0],
+                    [6, 5, 4, 3],
+                    [7, 2, 4, 1],
+                    [3, 0, 7, 8],
+                    [10, 8, 9, 2],
+                    [8, 2, 11, 9],
+                    [5, 11, 11, 8],
+                    [4, 10, 6, 3],
+                    [9, 10, 11, 4],
+                    [5, 0, 1, 6],
+                    [5, 1, 6, 10],
+                    [3, 7, 7, 9],
+                    [],
+                    [],
+                ],
+                4,
+            )
+            start_time = time.time()
+            moves = agent.solve(puzzle)
+            end_time = time.time()
+            total_time += end_time - start_time
+            self.assert_puzzle_solved(puzzle, moves)
+        print(f"Total time 3: {total_time:.3f} seconds")
+    
     def test_timing_unsolvable(self):
         total_time = 0
         for i in range(20):
