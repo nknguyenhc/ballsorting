@@ -15,7 +15,7 @@ class Agent:
         start_time = time.time()
         moves = self._solve(puzzle)
         end_time = time.time()
-        print(f"Time taken: {end_time - start_time:.3f} seconds")
+        # print(f"Time taken: {end_time - start_time:.3f} seconds")
         if moves is None:
             raise UnsolvablePuzzleException()
         return list(reversed(moves))
