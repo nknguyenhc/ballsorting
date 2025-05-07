@@ -1,6 +1,7 @@
 import unittest
 
 from .guided_dfs import GuidedAgent
+from .sorting import UnsolvablePuzzleException
 from state import State
 
 one_move = State(
@@ -174,6 +175,51 @@ class TestMoves(unittest.TestCase):
     
     def test_timing_unsolvable(self):
         self.try_state(timing_unsolvable)
+
+class TestAgent(unittest.TestCase):
+    def assert_puzzle_solved(self, puzzle: State, moves: list[tuple[int, int]]):
+        print(f"{puzzle=} {moves=}")
+        state = puzzle
+        for move in moves:
+            self.assertTrue(move in state.actions())
+            state = state.move(move)
+        self.assertTrue(state.is_terminal())
+    
+    def try_state(self, state: State):
+        agent = GuidedAgent()
+        moves = agent.solve(state)
+        self.assert_puzzle_solved(state, moves)
+    
+    def test_1_move(self):
+        self.try_state(one_move)
+    
+    def test_4_move(self):
+        self.try_state(four_moves)
+    
+    def test_unsolvable(self):
+        agent = GuidedAgent()
+        with self.assertRaises(UnsolvablePuzzleException):
+            agent.solve(unsolvable)
+    
+    def test_split_move(self):
+        self.try_state(split_move)
+    
+    def test_waiting_move(self):
+        self.try_state(waiting_move)
+    
+    def test_timing_1(self):
+        self.try_state(timing_1)
+    
+    def test_timing_2(self):
+        self.try_state(timing_2)
+    
+    def test_timing_3(self):
+        self.try_state(timing_3)
+    
+    def test_timing_unsolvable(self):
+        agent = GuidedAgent()
+        with self.assertRaises(UnsolvablePuzzleException):
+            agent.solve(timing_unsolvable)
 
 
 if __name__ == '__main__':
