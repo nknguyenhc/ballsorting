@@ -59,7 +59,10 @@ class GuidedAgent:
                 tube_scores.append(0)
                 continue
             score = 0
-            for i in range(len(tube) - 2, -1, -1):
+            upper = len(tube) - 2
+            while upper >= 0 and tube[upper] == tube[-1]:
+                upper -= 1
+            for i in range(upper, -1, -1):
                 if colour_scores[tube[i]] == 0:
                     break
                 score += colour_scores[tube[i]]
