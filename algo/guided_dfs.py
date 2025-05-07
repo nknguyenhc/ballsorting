@@ -91,6 +91,8 @@ class GuidedAgent:
         l: list[tuple[list[tuple[int, int]], State, int]] = []
         for _, tubes in colour_map.items():
             actions = [(tube, index) for tube in tubes if permissible_tubes[tube]]
+            if len(actions) == 0:
+                continue
             next_state = state
             for action in actions:
                 next_state = next_state.move(action)
@@ -105,6 +107,9 @@ class GuidedAgent:
                         break
                     score += colour_scores[state.balls[tube][i]]
             l.append((actions, next_state, score))
+        if len(l) == 0:
+            for actions, next_state in self._transfer_actions(state):
+                yield actions, next_state
         l.sort(key=lambda item: -item[2])
         for actions, next_state, _ in l:
             yield actions, next_state

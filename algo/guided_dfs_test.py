@@ -178,7 +178,7 @@ class TestMoves(unittest.TestCase):
 
 class TestAgent(unittest.TestCase):
     def assert_puzzle_solved(self, puzzle: State, moves: list[tuple[int, int]]):
-        print(f"{puzzle=} {moves=}")
+        # print(f"{puzzle=} {moves=}")
         state = puzzle
         for move in moves:
             self.assertTrue(move in state.actions())
