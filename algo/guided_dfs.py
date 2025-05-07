@@ -52,19 +52,7 @@ class GuidedAgent:
             yield [action], next_state
     
     def _sort_transfer_actions(self, state: State, actions: list[tuple[int, int]]):
-        tube_scores = self._get_tube_scores(state)
-        actions.sort(key=lambda action: -tube_scores[action[0]])
-    
-    def _get_tube_scores(self, state: State) -> list[int]:
-        colour_scores: defaultdict[int, int] = defaultdict(int)
-        for tube in state.balls:
-            if len(tube) == state.max_length or len(tube) == 0:
-                continue
-            if all(ball == tube[0] for ball in tube):
-                colour_scores[tube[0]] = 2
-            else:
-                colour_scores[tube[-1]] = max(colour_scores[tube[-1]], 1)
-
+        colour_scores = self._get_colour_scores(state)
         tube_scores: list[int] = []
         for tube in state.balls:
             if all(ball == tube[0] for ball in tube):
@@ -76,7 +64,18 @@ class GuidedAgent:
                     break
                 score += colour_scores[tube[i]]
             tube_scores.append(score)
-        return tube_scores
+        actions.sort(key=lambda action: -tube_scores[action[0]])
+    
+    def _get_colour_scores(self, state: State) -> list[int]:
+        colour_scores: defaultdict[int, int] = defaultdict(int)
+        for tube in state.balls:
+            if len(tube) == state.max_length or len(tube) == 0:
+                continue
+            if all(ball == tube[0] for ball in tube):
+                colour_scores[tube[0]] = 2
+            else:
+                colour_scores[tube[-1]] = max(colour_scores[tube[-1]], 1)
+        return colour_scores
     
     def _fill_actions(self, state: State, index: int) -> Iterator[tuple[list[tuple[int, int]], State]]:
         colour_map: defaultdict[int, list[int]] = defaultdict(list)
@@ -94,8 +93,13 @@ class GuidedAgent:
             if next_state in self.visited_states:
                 continue
             self.visited_states.add(next_state)
-            tube_scores = self._get_tube_scores(next_state)
-            score = sum(tube_scores)
+            colour_scores = self._get_colour_scores(next_state)
+            score = 0
+            for tube in tubes:
+                for i in range(len(state.balls[tube]) - 1, -1, -1):
+                    if colour_scores[state.balls[tube][i]] == 0:
+                        break
+                    score += colour_scores[state.balls[tube][i]]
             l.append((actions, next_state, score))
         l.sort(key=lambda item: -item[2])
         for actions, next_state, _ in l:
