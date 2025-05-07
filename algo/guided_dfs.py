@@ -84,9 +84,10 @@ class GuidedAgent:
                 continue
             colour_map[tube[-1]].append(i)
         
+        permissible_tubes = [not all(ball == tube[0] for ball in tube) for tube in state.balls]
         l: list[tuple[list[tuple[int, int]], State, int]] = []
         for _, tubes in colour_map.items():
-            actions = [(tube, index) for tube in tubes]
+            actions = [(tube, index) for tube in tubes if permissible_tubes[tube]]
             next_state = state
             for action in actions:
                 next_state = next_state.move(action)
