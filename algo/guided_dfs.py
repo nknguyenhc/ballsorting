@@ -67,6 +67,9 @@ class GuidedAgent:
 
         tube_scores: list[int] = []
         for tube in state.balls:
+            if all(ball == tube[0] for ball in tube):
+                tube_scores.append(0)
+                continue
             score = 0
             for i in range(len(tube) - 2, -1, -1):
                 if colour_scores[tube[i]] == 0:
