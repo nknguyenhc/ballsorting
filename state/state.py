@@ -15,6 +15,26 @@ class State:
         self.hash: int | None = None
         self.from_tube = from_tube
     
+    def find_invalid(self) -> tuple[int, int] | None:
+        """Checks if this ball puzzle can be solved,
+        i.e. each colour has exactly the same number of balls as `max_length`.
+
+        If this puzzle is valid, returns `None`.
+        Otherwise, returns a tuple of two elements.
+        1. The first element is the colour that has the wrong number of balls.
+        2. The second element is the number of balls that the colour has.
+        """
+        colour_map: dict[int, int] = dict()
+        for tube in self.balls:
+            for ball in tube:
+                if ball not in colour_map:
+                    colour_map[ball] = 0
+                colour_map[ball] += 1
+        for colour, count in colour_map.items():
+            if count != self.max_length:
+                return colour, count
+        return None
+    
     def move(self, move: tuple[int, int]) -> "State":
         """Moves the top ball from the from_tube to the to_tube.
         This function does not check the validity of the move.

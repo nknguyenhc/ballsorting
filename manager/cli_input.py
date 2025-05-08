@@ -17,6 +17,10 @@ class Manager:
 
         balls = self._get_tubes(num_of_tubes, max_length)
         puzzle = State(balls, max_length)
+        validity = puzzle.find_invalid()
+        if validity:
+            self._raise_invalid(validity)
+            return
         self.state = puzzle
         agent = Agent()
         start_time = time.time()
@@ -69,6 +73,11 @@ class Manager:
                 number_tube.append(self.colour_dict[ball])
 
             return number_tube
+    
+    def _raise_invalid(self, validity: tuple[int, int]):
+        colour_num, num = validity
+        colour = self.number_dict[colour_num]
+        print(f"Colour {colour} has the wrong number of balls: got {num}")
 
     def _announce_time(self, start_time: float, end_time: float):
         print(f"Took {end_time - start_time:.3f} seconds")

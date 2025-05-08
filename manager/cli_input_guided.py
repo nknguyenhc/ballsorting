@@ -18,6 +18,10 @@ class Manager(CliManager):
 
         balls = self._get_tubes(num_of_tubes, max_length)
         puzzle = State(balls, max_length)
+        validity = puzzle.find_invalid()
+        if validity:
+            self._raise_invalid(validity)
+            return
         self.state = puzzle
         agent = GuidedAgent()
         start_time = time.time()
