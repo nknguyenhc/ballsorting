@@ -1,4 +1,5 @@
 import unittest
+import time
 
 from .guided_dfs import GuidedAgent
 from .sorting import UnsolvablePuzzleException
@@ -190,6 +191,17 @@ class TestAgent(unittest.TestCase):
         moves = agent.solve(state)
         self.assert_puzzle_solved(state, moves)
     
+    def try_timing(self, state: State):
+        total_time = 0
+        for i in range(20):
+            agent = GuidedAgent()
+            start_time = time.time()
+            moves = agent.solve(state)
+            end_time = time.time()
+            total_time += end_time - start_time
+            self.assert_puzzle_solved(state, moves)
+        print(f"Total time: {total_time:.3f} seconds")
+    
     def test_1_move(self):
         self.try_state(one_move)
     
@@ -208,18 +220,24 @@ class TestAgent(unittest.TestCase):
         self.try_state(waiting_move)
     
     def test_timing_1(self):
-        self.try_state(timing_1)
+        self.try_timing(timing_1)
     
     def test_timing_2(self):
-        self.try_state(timing_2)
+        self.try_timing(timing_2)
     
     def test_timing_3(self):
-        self.try_state(timing_3)
+        self.try_timing(timing_3)
     
     def test_timing_unsolvable(self):
         agent = GuidedAgent()
-        with self.assertRaises(UnsolvablePuzzleException):
-            agent.solve(timing_unsolvable)
+        total_time = 0
+        for i in range(20):
+            start_time = time.time()
+            with self.assertRaises(UnsolvablePuzzleException):
+                agent.solve(timing_unsolvable)
+            end_time = time.time()
+            total_time += end_time - start_time
+        print(f"Total time unsolvable: {total_time:.3f} seconds")
 
 
 if __name__ == '__main__':
