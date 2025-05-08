@@ -40,6 +40,12 @@ pink red pink blue
 
 You can name the colour in whatever way you want, however, you need to make sure that the same colour is spelled the same everywhere, and consecutive colours are split by one white space.
 
+If the solver does not terminate in reasonable time, you can try the guided DFS solver. The idea behind this algorithm is that, there are moves that have better potential than others and are hence explored first. This algorithm may run slower on simpler puzzles due to the overhead of move sorting. However, it can run faster for more complicated puzzles.
+
+```bash
+python -m manager.cli_input_guided
+```
+
 To run the solver on unknown data, run the following command:
 
 ```bash
