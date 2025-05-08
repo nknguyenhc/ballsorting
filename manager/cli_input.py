@@ -1,3 +1,5 @@
+import time
+
 from state import State
 from algo import Agent, UnsolvablePuzzleException
 
@@ -17,12 +19,17 @@ class Manager:
         puzzle = State(balls, max_length)
         self.state = puzzle
         agent = Agent()
+        start_time = time.time()
         try:
             moves = agent.solve(puzzle)
         except UnsolvablePuzzleException:
+            end_time = time.time()
+            self._announce_time(start_time, end_time)
             print("The puzzle is unsolvable.")
             return
 
+        end_time = time.time()
+        self._announce_time(start_time, end_time)
         self._display_solution(moves)
 
     def _welcome(self):
@@ -62,6 +69,9 @@ class Manager:
                 number_tube.append(self.colour_dict[ball])
 
             return number_tube
+
+    def _announce_time(self, start_time: float, end_time: float):
+        print(f"Took {end_time - start_time:.3f} seconds")
 
     def _display_solution(self, moves: list[tuple[int, int]]):
         for move in moves:
