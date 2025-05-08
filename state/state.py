@@ -30,6 +30,16 @@ class State:
         new_from_tube = from_tube if len(new_balls[from_tube]) > 0 and new_balls[from_tube][-1] == colour else None
         return State(new_balls, self.max_length, from_tube=new_from_tube)
     
+    def is_valid_move(self, move: tuple[int, int], check_from_move: bool = True) -> bool:
+        from_tube, to_tube = move
+        if check_from_move and self.from_tube is not None and from_tube != self.from_tube:
+            return False
+        if len(self.balls[to_tube]) > 0 and self.balls[from_tube][-1] != self.balls[to_tube][-1]:
+            return False
+        if len(self.balls[to_tube]) == self.max_length:
+            return False
+        return True
+    
     def actions(self) -> list[tuple[int, int]]:
         """Returns a list of all possible moves from this state."""
         try:

@@ -181,7 +181,7 @@ class TestAgent(unittest.TestCase):
         # print(f"{puzzle=} {moves=}")
         state = puzzle
         for move in moves:
-            self.assertTrue(move in state.actions())
+            self.assertTrue(state.is_valid_move(move), f"Move {move} not valid for state {state}")
             state = state.move(move)
         self.assertTrue(state.is_terminal())
     
