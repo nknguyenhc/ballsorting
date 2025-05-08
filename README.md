@@ -1,6 +1,10 @@
 # ballsorting
 Solve ballsorting
 
+<img src="sample_data/lvl-999.jpg" width="200">
+
+I am retiring this project, until I get a Mac device to automate the gameplay.
+
 ## Setup
 
 ### Environment
